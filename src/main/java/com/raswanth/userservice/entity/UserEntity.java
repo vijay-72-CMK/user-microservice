@@ -32,6 +32,7 @@ public class UserEntity {
     private String username;
 
     @NotBlank
+    @Column(columnDefinition="CHAR(60)")
     private String password;
 
     @Email
@@ -40,6 +41,7 @@ public class UserEntity {
 
     @NotBlank(message = "Mobile number is required")
     @Pattern(regexp = "^(\\+\\d{1,3}( )?)?((\\(\\d{1,3}\\))|\\d{1,3})[- .]?\\d{3,4}[- .]?\\d{4}$", message = "Invalid mobile number format")
+    @Column(length = 50)
     private String mobileNumber;
 
     @NotBlank(message = "First name is required")
