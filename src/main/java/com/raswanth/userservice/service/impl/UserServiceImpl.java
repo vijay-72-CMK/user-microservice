@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -25,12 +27,13 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public void registerUser(UserRegistrationDTO userDTO) {
-        UserEntity existingUser = userRepository.findByUsername(userDTO.getUsername());
-        if (existingUser != null) {
+        Optional<UserEntity> existingUser = userRepository.findByUsername(userDTO.getUsername());
+        if (existingUser.isPresent()) {
             throw new UserAlreadyExistsException("Username is already used, try another one");
         }
+
         existingUser = userRepository.findByEmail(userDTO.getEmail());
-        if (existingUser != null) {
+        if (existingUser.isPresent()) {
             throw new UserAlreadyExistsException("Email is already registered, try another one");
         }
         String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
