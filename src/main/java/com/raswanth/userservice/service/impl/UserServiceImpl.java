@@ -3,6 +3,7 @@ package com.raswanth.userservice.service.impl;
 import com.raswanth.userservice.dto.UserRegistrationDTO;
 import com.raswanth.userservice.entity.RoleEntity;
 import com.raswanth.userservice.entity.UserEntity;
+import com.raswanth.userservice.exception.UserAlreadyExistsException;
 import com.raswanth.userservice.repositories.RoleRepository;
 import com.raswanth.userservice.repositories.UserRepository;
 import com.raswanth.userservice.service.UserService;
@@ -24,6 +25,14 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public void registerUser(UserRegistrationDTO userDTO) {
+        UserEntity existingUser = userRepository.findByUsername(userDTO.getUsername());
+        if (existingUser != null) {
+            throw new UserAlreadyExistsException("Username is already used, try another one");
+        }
+        existingUser = userRepository.findByEmail(userDTO.getEmail());
+        if (existingUser != null) {
+            throw new UserAlreadyExistsException("Email is already registered, try another one");
+        }
         String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
 
         UserEntity user = new UserEntity();
