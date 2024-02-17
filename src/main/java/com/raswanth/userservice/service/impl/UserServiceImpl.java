@@ -12,7 +12,6 @@ import com.raswanth.userservice.service.JWTService;
 import com.raswanth.userservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -71,7 +70,7 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userRepository.findByUsername(signInRequestDTO.getUsername()).orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
         String token = jwtService.generateToken(user);
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", token);
+        headers.add("Set-Cookie","accessToken="+token+";Max-Age=3600;Secure; HttpOnly");
 
         return ResponseEntity.ok().headers(headers).body(new JwtAuthenticationResponse("Logged in succesfully!"));
     }
