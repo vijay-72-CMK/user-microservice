@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public void deleteUser(String username) {
-        userRepository.findByUsername(username).orElseThrow(() -> new GeneralInternalException("Cannot delete as username does not exist", HttpStatus.BAD_REQUEST));
+        userRepository.findByUsername(username).orElseThrow(() -> new GeneralInternalException("Cannot delete as username does not exist", HttpStatus.NOT_FOUND));
         userRepository.deleteByUsername(username);
     }
 

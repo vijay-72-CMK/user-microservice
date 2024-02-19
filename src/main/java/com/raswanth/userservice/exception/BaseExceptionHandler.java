@@ -1,8 +1,6 @@
 package com.raswanth.userservice.exception;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -26,15 +24,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler({Throwable.class})
-    public ProblemDetail handleRuntimeException(Throwable exception) {
-        logger.error("Unexpected exception", exception);
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "something went wrong");
-        problemDetail.setTitle("Something went wrong, please try again latter");
-        problemDetail.setType(URI.create("http://localhost:8080/errors/internalServerError"));
-        problemDetail.setProperty("timestamp", Instant.now());
-        return problemDetail;
-    }
+//    @ExceptionHandler({Throwable.class})
+//    public ProblemDetail handleRuntimeException(Throwable exception) {
+//        logger.error("Unexpected exception", exception);
+//        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "something went wrong");
+//        problemDetail.setTitle("Something went wrong, please try again latter");
+//        problemDetail.setType(URI.create("http://localhost:8080/errors/internalServerError"));
+//        problemDetail.setProperty("timestamp", Instant.now());
+//        return problemDetail;
+//    }
     @ExceptionHandler({GeneralInternalException.class})
     public ProblemDetail handleGeneralInternalException(GeneralInternalException exception) {
         HttpStatus status = exception.getHttpStatus();
@@ -87,6 +85,7 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
         String uri = switch(status) {
             case INTERNAL_SERVER_ERROR -> "http://localhost:8080/errors/internalServerError";
             case BAD_REQUEST -> "http://localhost:8080/errors/badRequest";
+            case NOT_FOUND -> "http://localhost:8080/errors/notFound";
             default -> throw new IllegalStateException("Unexpected value: " + status);
         };
         return uri;
@@ -96,17 +95,10 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
         String title = switch(status) {
             case INTERNAL_SERVER_ERROR -> "Internal server error";
             case BAD_REQUEST -> "Invalid request";
+            case NOT_FOUND -> "Not found";
             default -> throw new IllegalStateException("Unexpected value: " + status);
         };
         return title;
     }
 
-    public String getDetail(HttpStatus status) {
-        String detail = switch (status) {
-            case INTERNAL_SERVER_ERROR -> "Internal server issue, try again latter or contact support";
-            case BAD_REQUEST -> "Request in not valid, please re-try with correct request format";
-            default -> throw new IllegalStateException("Unexpected value: " + status);
-        };
-        return detail;
-    }
 }
