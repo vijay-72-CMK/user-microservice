@@ -10,6 +10,7 @@ import com.raswanth.userservice.repositories.RoleRepository;
 import com.raswanth.userservice.repositories.UserRepository;
 import com.raswanth.userservice.service.JWTService;
 import com.raswanth.userservice.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +20,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -39,30 +40,36 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public void registerUser(UserRegistrationDTO userDTO) {
-        Optional<UserEntity> existingUser = userRepository.findByUsername(userDTO.getUsername());
-        if (existingUser.isPresent()) {
-            throw new UserAlreadyExistsException("Username is already used, try another one");
-        }
+//        try {
+//            userRepository.findByUsername(userDTO.getUsername())
+//                    .ifPresent((user) -> {
+//                        throw new UserAlreadyExistsException("Username already exists");
+//                    });
 
-        existingUser = userRepository.findByEmail(userDTO.getEmail());
-        if (existingUser.isPresent()) {
-            throw new UserAlreadyExistsException("Email is already registered, try another one");
-        }
-        String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
+            userRepository.findByEmail(userDTO.getEmail()).
+                    ifPresent((user) ->  {
+                       throw new UserAlreadyExistsException("Email already exists");
+                    });
 
-        UserEntity user = new UserEntity();
-        user.setUsername(userDTO.getUsername());
-        user.setPassword(encodedPassword);
-        user.setEmail(userDTO.getEmail());
-        user.setMobileNumber(userDTO.getMobileNumber());
-        user.setFirstName(userDTO.getFirstName());
-        user.setLastName(userDTO.getLastName());
-        user.setEnabled(true);
+            String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
 
-        RoleEntity defaultRole = roleRepository.findByName("Customer");
-        user.getRoles().add(defaultRole);
+            UserEntity user = new UserEntity();
+            user.setUsername(userDTO.getUsername());
+            user.setPassword(encodedPassword);
+            user.setEmail(userDTO.getEmail());
+            user.setMobileNumber(userDTO.getMobileNumber());
+            user.setFirstName(userDTO.getFirstName());
+            user.setLastName(userDTO.getLastName());
+            user.setEnabled(true);
 
-        userRepository.save(user);
+            RoleEntity defaultRole = roleRepository.findByName("Customer");
+            user.getRoles().add(defaultRole);
+
+            userRepository.save(user);
+//        } catch (DataAccessException ex) {
+//            log.error("Error occurred while registering user", ex);
+//            throw new RuntimeException("Something went wrong, please try again latter");
+//        }
     }
 
     public ResponseEntity<JwtAuthenticationResponse> sigin(SignInRequestDTO signInRequestDTO) {
