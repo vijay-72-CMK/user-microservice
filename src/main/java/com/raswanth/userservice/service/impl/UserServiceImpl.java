@@ -5,14 +5,18 @@ import com.raswanth.userservice.dto.SignInRequestDTO;
 import com.raswanth.userservice.dto.UserRegistrationDTO;
 import com.raswanth.userservice.entity.RoleEntity;
 import com.raswanth.userservice.entity.UserEntity;
-import com.raswanth.userservice.exception.UserAlreadyExistsException;
+import com.raswanth.userservice.exception.GeneralInternalException;
 import com.raswanth.userservice.repositories.RoleRepository;
 import com.raswanth.userservice.repositories.UserRepository;
 import com.raswanth.userservice.service.JWTService;
 import com.raswanth.userservice.service.UserService;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +28,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@Transactional
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -40,16 +45,7 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public void registerUser(UserRegistrationDTO userDTO) {
-//        try {
-//            userRepository.findByUsername(userDTO.getUsername())
-//                    .ifPresent((user) -> {
-//                        throw new UserAlreadyExistsException("Username already exists");
-//                    });
-
-            userRepository.findByEmail(userDTO.getEmail()).
-                    ifPresent((user) ->  {
-                       throw new UserAlreadyExistsException("Email already exists");
-                    });
+        try {
 
             String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
 
@@ -66,10 +62,12 @@ public class UserServiceImpl implements UserService {
             user.getRoles().add(defaultRole);
 
             userRepository.save(user);
-//        } catch (DataAccessException ex) {
-//            log.error("Error occurred while registering user", ex);
-//            throw new RuntimeException("Something went wrong, please try again latter");
-//        }
+        } catch (DataIntegrityViolationException ex) {
+            throw new GeneralInternalException("User already exists, use a unique email and username", HttpStatus.BAD_REQUEST);
+        }
+        catch (DataAccessException ex) {
+            throw new GeneralInternalException("Database error while registering user with username " + userDTO.getUsername());
+        }
     }
 
     public ResponseEntity<JwtAuthenticationResponse> sigin(SignInRequestDTO signInRequestDTO) {
@@ -80,6 +78,11 @@ public class UserServiceImpl implements UserService {
         headers.add("Set-Cookie","accessToken="+token+";Max-Age=3600;Secure; HttpOnly");
 
         return ResponseEntity.ok().headers(headers).body(new JwtAuthenticationResponse("Logged in succesfully!"));
+    }
+
+    public void deleteUser(String username) {
+        userRepository.findByUsername(username).orElseThrow(() -> new GeneralInternalException("Cannot delete as username does not exist", HttpStatus.BAD_REQUEST));
+        userRepository.deleteByUsername(username);
     }
 
     @Override
