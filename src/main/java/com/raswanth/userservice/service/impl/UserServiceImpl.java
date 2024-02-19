@@ -77,14 +77,14 @@ public class UserServiceImpl implements UserService {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String token = jwtService.generateToken(userDetails);
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Set-Cookie","accessToken="+token+";Max-Age=3600;Secure; HttpOnly");
+        long expiry = System.currentTimeMillis() + 3600000 * 3;
+        headers.add("Set-Cookie","accessToken="+token+";Max-Age="+expiry+";Secure; HttpOnly");
 
         return ResponseEntity.ok().headers(headers).body(new JwtAuthenticationResponse("Logged in succesfully!"));
     }
 
     public void deleteUser(String username) {
-        userRepository.findByUsername(username).orElseThrow(() -> new GeneralInternalException("Cannot delete as username does not exist", HttpStatus.NOT_FOUND));
-        userRepository.deleteByUsername(username);
+        if (userRepository.deleteByUsername(username) == 0) throw new GeneralInternalException("Could not delete user as username does not exist", HttpStatus.NOT_FOUND);
     }
 
     @Override

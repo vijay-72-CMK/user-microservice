@@ -6,6 +6,7 @@ import com.raswanth.userservice.dto.UserRegistrationDTO;
 import com.raswanth.userservice.entity.UserEntity;
 import com.raswanth.userservice.service.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +40,7 @@ public class UserController {
 
     @PreAuthorize("hasRole('Admin')")
     @DeleteMapping("/{username}")
-    public ResponseEntity<String> deleteUser(@PathVariable String username) {
+    public ResponseEntity<String> deleteUser(@PathVariable @NotBlank String username) {
         userService.deleteUser(username);
         return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully");
     }
