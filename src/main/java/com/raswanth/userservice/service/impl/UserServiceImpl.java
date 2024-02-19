@@ -1,5 +1,6 @@
 package com.raswanth.userservice.service.impl;
 
+import com.raswanth.userservice.dto.ChangePasswordRequestDto;
 import com.raswanth.userservice.dto.JwtAuthenticationResponse;
 import com.raswanth.userservice.dto.SignInRequestDTO;
 import com.raswanth.userservice.dto.UserRegistrationDTO;
@@ -25,6 +26,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.List;
 
 
@@ -77,7 +79,7 @@ public class UserServiceImpl implements UserService {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String token = jwtService.generateToken(userDetails);
         HttpHeaders headers = new HttpHeaders();
-        long expiry = System.currentTimeMillis() + 3600000 * 3;
+        long expiry = 259200;
         headers.add("Set-Cookie","accessToken="+token+";Max-Age="+expiry+";Secure; HttpOnly");
 
         return ResponseEntity.ok().headers(headers).body(new JwtAuthenticationResponse("Logged in succesfully!"));
@@ -85,6 +87,26 @@ public class UserServiceImpl implements UserService {
 
     public void deleteUser(String username) {
         if (userRepository.deleteByUsername(username) == 0) throw new GeneralInternalException("Could not delete user as username does not exist", HttpStatus.NOT_FOUND);
+    }
+
+    @Override
+    public void changePassword(ChangePasswordRequestDto changePasswordRequestDto, Principal signedInUser) {
+        try {
+            UserEntity user = (UserEntity) ((UsernamePasswordAuthenticationToken) signedInUser).getPrincipal();
+
+            // password checks
+            if (!passwordEncoder.matches(changePasswordRequestDto.getCurrentPassword(), user.getPassword())) {
+                throw new GeneralInternalException("Current password is not correct, try again", HttpStatus.BAD_REQUEST);
+            }
+            if (!changePasswordRequestDto.getNewPassword().equals(changePasswordRequestDto.getConfirmPassword())) {
+                throw new GeneralInternalException("Passwords do not match, try again", HttpStatus.BAD_REQUEST);
+            }
+
+            user.setPassword(passwordEncoder.encode(changePasswordRequestDto.getConfirmPassword()));
+            userRepository.save(user);
+        } catch (DataAccessException ex) {
+            throw new GeneralInternalException("Database error while updating password");
+        }
     }
 
     @Override
