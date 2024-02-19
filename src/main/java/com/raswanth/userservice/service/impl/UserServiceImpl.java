@@ -20,6 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -71,9 +73,9 @@ public class UserServiceImpl implements UserService {
     }
 
     public ResponseEntity<JwtAuthenticationResponse> sigin(SignInRequestDTO signInRequestDTO) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signInRequestDTO.getUsername(), signInRequestDTO.getPassword()));
-        UserEntity user = userRepository.findByUsername(signInRequestDTO.getUsername()).orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
-        String token = jwtService.generateToken(user);
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signInRequestDTO.getUsername(), signInRequestDTO.getPassword()));
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String token = jwtService.generateToken(userDetails);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Set-Cookie","accessToken="+token+";Max-Age=3600;Secure; HttpOnly");
 
