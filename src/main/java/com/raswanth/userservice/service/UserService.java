@@ -1,5 +1,6 @@
 package com.raswanth.userservice.service;
 
+import com.raswanth.userservice.dto.AddressRequestDTO;
 import com.raswanth.userservice.dto.ChangePasswordRequestDto;
 import com.raswanth.userservice.dto.JwtAuthenticationResponse;
 import com.raswanth.userservice.dto.SignInRequestDTO;
@@ -20,4 +21,6 @@ public interface UserService {
     void deleteUser(String username);
 
     void changePassword(ChangePasswordRequestDto changePasswordRequestDto, Principal singedInUser);
+
+    void addAddress(AddressRequestDTO addressRequest, Principal signedInUser);
 }

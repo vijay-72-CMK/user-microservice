@@ -1,5 +1,6 @@
 package com.raswanth.userservice.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -67,7 +68,7 @@ public class UserEntity implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<RoleEntity> roles = new HashSet<>();
 
-    @OneToMany
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
     @JoinColumn(name = "user_id")
     private Set<AddressEntity> addressEntities;
 

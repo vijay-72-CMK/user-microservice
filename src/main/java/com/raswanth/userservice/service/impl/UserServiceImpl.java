@@ -1,10 +1,12 @@
 package com.raswanth.userservice.service.impl;
 
+import com.raswanth.userservice.dto.AddressRequestDTO;
 import com.raswanth.userservice.dto.ChangePasswordRequestDto;
 import com.raswanth.userservice.dto.JwtAuthenticationResponse;
 import com.raswanth.userservice.dto.SignInRequestDTO;
 import com.raswanth.userservice.dto.UserRegistrationDTO;
 import com.raswanth.userservice.dto.ViewUsersResponseDTO;
+import com.raswanth.userservice.entity.AddressEntity;
 import com.raswanth.userservice.entity.RoleEntity;
 import com.raswanth.userservice.entity.UserEntity;
 import com.raswanth.userservice.exception.GeneralInternalException;
@@ -108,6 +110,24 @@ public class UserServiceImpl implements UserService {
         } catch (DataAccessException ex) {
             throw new GeneralInternalException("Database error while updating password");
         }
+    }
+
+    @Override
+    @Transactional
+    public void addAddress(AddressRequestDTO addressRequest, Principal signedInUser) {
+        UserEntity userDetails = (UserEntity) ((UsernamePasswordAuthenticationToken) signedInUser).getPrincipal();
+
+        UserEntity currUser = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new GeneralInternalException("User id not found while adding address", HttpStatus.NOT_FOUND));
+
+        AddressEntity addressEntity = AddressEntity.builder()
+                .street(addressRequest.getStreet())
+                .city(addressRequest.getCity())
+                .state(addressRequest.getState())
+                .zipCode(addressRequest.getZipCode())
+                .build();
+        currUser.getAddressEntities().add(addressEntity);
+        userRepository.save(currUser);
     }
 
     @Override

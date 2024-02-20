@@ -1,5 +1,6 @@
 package com.raswanth.userservice.controller;
 
+import com.raswanth.userservice.dto.AddressRequestDTO;
 import com.raswanth.userservice.dto.ChangePasswordRequestDto;
 import com.raswanth.userservice.dto.JwtAuthenticationResponse;
 import com.raswanth.userservice.dto.SignInRequestDTO;
@@ -58,6 +59,13 @@ public class UserController {
                                             Principal signedInUser) {
         userService.changePassword(changePasswordRequestDto, signedInUser);
         return ResponseEntity.status(HttpStatus.OK).body("Changed !");
+    }
+
+    @PostMapping("/addresses")
+    public ResponseEntity<?> addAddress(@RequestBody @Valid AddressRequestDTO addressRequest,
+                                        Principal signedInUser) {
+        userService.addAddress(addressRequest, signedInUser);
+        return ResponseEntity.status(HttpStatus.OK).body("Added !");
     }
 
 }
