@@ -4,7 +4,7 @@ import com.raswanth.userservice.dto.ChangePasswordRequestDto;
 import com.raswanth.userservice.dto.JwtAuthenticationResponse;
 import com.raswanth.userservice.dto.SignInRequestDTO;
 import com.raswanth.userservice.dto.UserRegistrationDTO;
-import com.raswanth.userservice.entity.UserEntity;
+import com.raswanth.userservice.dto.ViewUsersResponseDTO;
 import com.raswanth.userservice.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @GetMapping("/all")
-    public List<UserEntity> viewUsers() {
+    public List<ViewUsersResponseDTO> viewUsers() {
         return userService.getAllUsers();
     }
 
@@ -54,7 +54,7 @@ public class UserController {
     }
 
     @PostMapping("/changePassword")
-    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequestDto changePasswordRequestDto,
+    public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordRequestDto changePasswordRequestDto,
                                             Principal signedInUser) {
         userService.changePassword(changePasswordRequestDto, signedInUser);
         return ResponseEntity.status(HttpStatus.OK).body("Changed !");
