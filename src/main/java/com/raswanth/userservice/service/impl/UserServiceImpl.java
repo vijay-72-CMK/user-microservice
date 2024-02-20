@@ -1,11 +1,6 @@
 package com.raswanth.userservice.service.impl;
 
-import com.raswanth.userservice.dto.AddressRequestDTO;
-import com.raswanth.userservice.dto.ChangePasswordRequestDto;
-import com.raswanth.userservice.dto.JwtAuthenticationResponse;
-import com.raswanth.userservice.dto.SignInRequestDTO;
-import com.raswanth.userservice.dto.UserRegistrationDTO;
-import com.raswanth.userservice.dto.ViewUsersResponseDTO;
+import com.raswanth.userservice.dto.*;
 import com.raswanth.userservice.entity.AddressEntity;
 import com.raswanth.userservice.entity.RoleEntity;
 import com.raswanth.userservice.entity.UserEntity;
@@ -16,7 +11,6 @@ import com.raswanth.userservice.service.JWTService;
 import com.raswanth.userservice.service.UserService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -33,6 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -142,6 +137,25 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<ViewUsersResponseDTO> getAllUsers() {
-        return userRepository.findAllUsers();
+        try {
+            List<UserEntity> users = userRepository.findAll();
+            List<ViewUsersResponseDTO> usersResponseDTOList = new ArrayList<>();
+            for (UserEntity user : users) {
+                usersResponseDTOList.add(
+                        ViewUsersResponseDTO.builder()
+                                .id(user.getId())
+                                .email(user.getEmail())
+                                .lastName(user.getLastName())
+                                .firstName(user.getFirstName())
+                                .addressEntities(user.getAddressEntities())
+                                .mobileNumber(user.getMobileNumber())
+                                .username(user.getUsername())
+                                .build());
+
+            }
+            return usersResponseDTOList;
+        } catch (DataAccessException ex) {
+            throw new GeneralInternalException("Database error while trying to add view all users");
+        }
     }
 }

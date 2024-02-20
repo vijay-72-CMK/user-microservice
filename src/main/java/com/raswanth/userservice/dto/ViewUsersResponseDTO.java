@@ -1,10 +1,16 @@
 package com.raswanth.userservice.dto;
 
+import com.raswanth.userservice.entity.AddressEntity;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+
+import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
+@Builder
 public class ViewUsersResponseDTO {
     private Long id;
     private String username;
@@ -12,5 +18,7 @@ public class ViewUsersResponseDTO {
     private String mobileNumber;
     private String firstName;
     private String lastName;
+
+    private Set<AddressEntity> addressEntities;
 
 }

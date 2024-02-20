@@ -1,11 +1,6 @@
 package com.raswanth.userservice.service;
 
-import com.raswanth.userservice.dto.AddressRequestDTO;
-import com.raswanth.userservice.dto.ChangePasswordRequestDto;
-import com.raswanth.userservice.dto.JwtAuthenticationResponse;
-import com.raswanth.userservice.dto.SignInRequestDTO;
-import com.raswanth.userservice.dto.UserRegistrationDTO;
-import com.raswanth.userservice.dto.ViewUsersResponseDTO;
+import com.raswanth.userservice.dto.*;
 import org.springframework.http.ResponseEntity;
 
 import java.security.Principal;

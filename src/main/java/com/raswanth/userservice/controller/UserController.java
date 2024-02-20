@@ -1,11 +1,6 @@
 package com.raswanth.userservice.controller;
 
-import com.raswanth.userservice.dto.AddressRequestDTO;
-import com.raswanth.userservice.dto.ChangePasswordRequestDto;
-import com.raswanth.userservice.dto.JwtAuthenticationResponse;
-import com.raswanth.userservice.dto.SignInRequestDTO;
-import com.raswanth.userservice.dto.UserRegistrationDTO;
-import com.raswanth.userservice.dto.ViewUsersResponseDTO;
+import com.raswanth.userservice.dto.*;
 import com.raswanth.userservice.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
