@@ -9,6 +9,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -48,7 +49,7 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public ProblemDetail handleConstraintViolation(
             ConstraintViolationException ex) {
-
+        log.error(ex.getMessage(), ex);
         List<Map<String, String>> invalidPathVariables = ex.getConstraintViolations().stream()
                 .map(violation -> Map.of(
                         "field", violation.getPropertyPath().toString(),
@@ -92,6 +93,21 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, problemDetail, headers, status, request);
     }
 
+    @Override
+    protected ResponseEntity<Object> handleMissingPathVariable(MissingPathVariableException ex, HttpHeaders headers,
+                                                               HttpStatusCode status, WebRequest request) {
+
+        String error = ex.getParameter() + " parameter is missing";
+        // Create the ProblemDetail object
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, "Missing path variable");
+        problemDetail.setTitle("Your path parameters are missing");
+        problemDetail.setType(URI.create("http://localhost:8080/errors/missingPathParameters"));
+        problemDetail.setProperty("invalid-params", error);
+        problemDetail.setProperty("timestamp", Instant.now());
+
+        return handleExceptionInternal(ex, problemDetail, headers, status, request);
+
+    }
     public String getUri(HttpStatus status) {
         String uri = switch(status) {
             case INTERNAL_SERVER_ERROR -> "http://localhost:8080/errors/internalServerError";

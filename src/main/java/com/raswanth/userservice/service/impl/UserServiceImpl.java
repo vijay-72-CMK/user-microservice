@@ -1,6 +1,10 @@
 package com.raswanth.userservice.service.impl;
 
-import com.raswanth.userservice.dto.*;
+import com.raswanth.userservice.dto.AddressRequestDTO;
+import com.raswanth.userservice.dto.ChangePasswordRequestDto;
+import com.raswanth.userservice.dto.SignInRequestDTO;
+import com.raswanth.userservice.dto.UserRegistrationDTO;
+import com.raswanth.userservice.dto.ViewUsersResponseDTO;
 import com.raswanth.userservice.entity.AddressEntity;
 import com.raswanth.userservice.entity.RoleEntity;
 import com.raswanth.userservice.entity.UserEntity;
@@ -40,6 +44,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
+
     @Autowired
     public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JWTService jwtService) {
         this.userRepository = userRepository;
@@ -48,6 +53,7 @@ public class UserServiceImpl implements UserService {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
     }
+
     @Override
     public void registerUser(UserRegistrationDTO userDTO) {
         try {
@@ -70,8 +76,7 @@ public class UserServiceImpl implements UserService {
         } catch (DataIntegrityViolationException ex) {
             log.error(ex.getMessage());
             throw new GeneralInternalException("User already exists, use a unique email and username", HttpStatus.BAD_REQUEST);
-        }
-        catch (DataAccessException ex) {
+        } catch (DataAccessException ex) {
             throw new GeneralInternalException("Database error while registering user with username " + userDTO.getUsername());
         }
     }
@@ -91,7 +96,8 @@ public class UserServiceImpl implements UserService {
     }
 
     public void deleteUser(String username) {
-        if (userRepository.deleteByUsername(username) == 0) throw new GeneralInternalException("Could not delete user as username does not exist", HttpStatus.NOT_FOUND);
+        if (userRepository.deleteByUsername(username) == 0)
+            throw new GeneralInternalException("Could not delete user as username does not exist", HttpStatus.NOT_FOUND);
     }
 
     @Override
@@ -133,6 +139,26 @@ public class UserServiceImpl implements UserService {
             userRepository.save(currUser);
         } catch (DataAccessException ex) {
             throw new GeneralInternalException("Database error while trying to add address");
+        }
+    }
+
+    @Override
+    public ViewUsersResponseDTO getUserById(Long id) {
+        try {
+            UserEntity user = userRepository.findById(id)
+                    .orElseThrow(() -> new GeneralInternalException("Cannot get user as Id does not exist", HttpStatus.NOT_FOUND));
+
+            return ViewUsersResponseDTO.builder()
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .lastName(user.getLastName())
+                    .firstName(user.getFirstName())
+                    .addressEntities(user.getAddressEntities())
+                    .mobileNumber(user.getMobileNumber())
+                    .username(user.getUsername())
+                    .build();
+        } catch (DataAccessException ex) {
+            throw new GeneralInternalException("Database error while trying to add view user with id: " + id);
         }
     }
 
