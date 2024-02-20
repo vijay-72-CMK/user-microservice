@@ -68,6 +68,7 @@ public class UserServiceImpl implements UserService {
 
             userRepository.save(user);
         } catch (DataIntegrityViolationException ex) {
+            log.error(ex.getMessage());
             throw new GeneralInternalException("User already exists, use a unique email and username", HttpStatus.BAD_REQUEST);
         }
         catch (DataAccessException ex) {

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@Validated
 public class UserController {
     private final UserService userService;
 
@@ -44,7 +46,7 @@ public class UserController {
 
     @PreAuthorize("hasRole('Admin')")
     @DeleteMapping("/{username}")
-    public ResponseEntity<String> deleteUser(@PathVariable @NotBlank String username) {
+    public ResponseEntity<String> deleteUser(@PathVariable @NotBlank(message = "Username cannot be blank") String username) {
         userService.deleteUser(username);
         return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully");
     }

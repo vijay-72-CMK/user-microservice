@@ -1,6 +1,7 @@
 package com.raswanth.userservice.repositories;
 
 import com.raswanth.userservice.dto.ViewUsersResponseDTO;
+import com.raswanth.userservice.entity.AddressEntity;
 import com.raswanth.userservice.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
