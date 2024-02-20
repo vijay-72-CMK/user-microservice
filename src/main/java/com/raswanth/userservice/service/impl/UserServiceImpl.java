@@ -15,6 +15,8 @@ import com.raswanth.userservice.repositories.UserRepository;
 import com.raswanth.userservice.service.JWTService;
 import com.raswanth.userservice.service.UserService;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -23,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -77,15 +80,18 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public ResponseEntity<JwtAuthenticationResponse> sigin(SignInRequestDTO signInRequestDTO) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signInRequestDTO.getUsername(), signInRequestDTO.getPassword()));
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String token = jwtService.generateToken(userDetails);
-        HttpHeaders headers = new HttpHeaders();
-        long expiry = 259200;
-        headers.add("Set-Cookie","accessToken="+token+";Max-Age="+expiry+";Secure; HttpOnly");
-
-        return ResponseEntity.ok().headers(headers).body(new JwtAuthenticationResponse("Logged in succesfully!"));
+    public ResponseEntity<String> sigin(SignInRequestDTO signInRequestDTO) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signInRequestDTO.getUsername(), signInRequestDTO.getPassword()));
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String token = jwtService.generateToken(userDetails);
+            HttpHeaders headers = new HttpHeaders();
+            long expiry = 259200;
+            headers.add("Set-Cookie", "accessToken=" + token + ";Max-Age=" + expiry + ";Secure; HttpOnly");
+            return ResponseEntity.ok().headers(headers).body("Logged in successfully!");
+        } catch (BadCredentialsException ex) {
+            throw new GeneralInternalException("Bad credentials(sign in), please enter correct username and password", HttpStatus.BAD_REQUEST);
+        }
     }
 
     public void deleteUser(String username) {
@@ -93,7 +99,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void changePassword(ChangePasswordRequestDto changePasswordRequestDto, Principal signedInUser) {
+    public void changePassword(@Valid ChangePasswordRequestDto changePasswordRequestDto, Principal signedInUser) {
         try {
             UserEntity user = (UserEntity) ((UsernamePasswordAuthenticationToken) signedInUser).getPrincipal();
 
@@ -115,19 +121,23 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void addAddress(AddressRequestDTO addressRequest, Principal signedInUser) {
-        UserEntity userDetails = (UserEntity) ((UsernamePasswordAuthenticationToken) signedInUser).getPrincipal();
+        try {
+            UserEntity userDetails = (UserEntity) ((UsernamePasswordAuthenticationToken) signedInUser).getPrincipal();
 
-        UserEntity currUser = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new GeneralInternalException("User id not found while adding address", HttpStatus.NOT_FOUND));
+            UserEntity currUser = userRepository.findByUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new GeneralInternalException("User id not found while adding address", HttpStatus.NOT_FOUND));
 
-        AddressEntity addressEntity = AddressEntity.builder()
-                .street(addressRequest.getStreet())
-                .city(addressRequest.getCity())
-                .state(addressRequest.getState())
-                .zipCode(addressRequest.getZipCode())
-                .build();
-        currUser.getAddressEntities().add(addressEntity);
-        userRepository.save(currUser);
+            AddressEntity addressEntity = AddressEntity.builder()
+                    .street(addressRequest.getStreet())
+                    .city(addressRequest.getCity())
+                    .state(addressRequest.getState())
+                    .zipCode(addressRequest.getZipCode())
+                    .build();
+            currUser.getAddressEntities().add(addressEntity);
+            userRepository.save(currUser);
+        } catch (DataAccessException ex) {
+            throw new GeneralInternalException("Database error while trying to add address");
+        }
     }
 
     @Override

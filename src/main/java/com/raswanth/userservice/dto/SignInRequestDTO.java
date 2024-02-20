@@ -16,7 +16,5 @@ public class SignInRequestDTO {
     private String username;
 
     @NotBlank(message = "Password cannot be empty")
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",
-            message = "Password must have one upper, one lower and one special char and have a length of atleast 8")
     private String password;
 }

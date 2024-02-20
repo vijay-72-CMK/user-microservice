@@ -24,15 +24,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
 
-//    @ExceptionHandler({Throwable.class})
-//    public ProblemDetail handleRuntimeException(Throwable exception) {
-//        logger.error("Unexpected exception", exception);
-//        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "something went wrong");
-//        problemDetail.setTitle("Something went wrong, please try again latter");
-//        problemDetail.setType(URI.create("http://localhost:8080/errors/internalServerError"));
-//        problemDetail.setProperty("timestamp", Instant.now());
-//        return problemDetail;
-//    }
+    @ExceptionHandler({Throwable.class})
+    public ProblemDetail handleRuntimeException(Throwable exception) {
+        logger.error("Unexpected exception", exception);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "something went wrong");
+        problemDetail.setTitle("Something went wrong, please try again latter");
+        problemDetail.setType(URI.create("http://localhost:8080/errors/internalServerError"));
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
     @ExceptionHandler({GeneralInternalException.class})
     public ProblemDetail handleGeneralInternalException(GeneralInternalException exception) {
         HttpStatus status = exception.getHttpStatus();
@@ -43,17 +43,6 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
         problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
     }
-
-//    @ExceptionHandler({DataAccessException.class})
-//    public ProblemDetail handleDataAccessException(DataAccessException exception) {
-//        logger.error("Database error", exception);
-//        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "something went wrong");
-//        problemDetail.setTitle("Database issues, please try again latter");
-//        problemDetail.setType(URI.create("http://localhost:8080/errors/internalServerError"));
-//        problemDetail.setProperty("timestamp", Instant.now());
-//        return problemDetail;
-//    }
-
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex, HttpHeaders headers,

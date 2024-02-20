@@ -16,7 +16,7 @@ public interface UserService {
 
     List<ViewUsersResponseDTO> getAllUsers();
 
-    ResponseEntity<JwtAuthenticationResponse> sigin(SignInRequestDTO signInRequestDTO);
+    ResponseEntity<String> sigin(SignInRequestDTO signInRequestDTO);
 
     void deleteUser(String username);
 

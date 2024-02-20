@@ -38,7 +38,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JwtAuthenticationResponse> loginUser(@RequestBody SignInRequestDTO signInRequestDTO) {
+    public ResponseEntity<String> loginUser(@Valid @RequestBody SignInRequestDTO signInRequestDTO) {
         return userService.sigin(signInRequestDTO);
     }
 
