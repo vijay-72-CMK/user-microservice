@@ -93,4 +93,9 @@ public class UserEntity implements UserDetails {
     public boolean isCredentialsNonExpired() {
         return true;
     }
+
+    @Override
+    public String getUsername() {
+        return String.valueOf(id);
+    }
 }

@@ -6,11 +6,14 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Function;
 
 @Service
@@ -19,7 +22,12 @@ public class JWTServiceImpl implements JWTService {
 
     @Override
     public String generateToken(UserDetails userDetails) {
+        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+        List<String> authorityNames = authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
         return Jwts.builder().subject((userDetails.getUsername()))
+                .claim("authorities", authorityNames)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 3600000 * 3))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
@@ -35,7 +43,7 @@ public class JWTServiceImpl implements JWTService {
         return claimsResolvers.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
         return Jwts.parser().setSigningKey(getSignKey()).build().parseClaimsJws(token).getBody();
     }
 
@@ -46,10 +54,10 @@ public class JWTServiceImpl implements JWTService {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUserName(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        return username.equals(userDetails.getUsername()) && isTokenNotExpired(token);
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractClaim(token, Claims::getExpiration).before(new Date());
+    public boolean isTokenNotExpired(String token) {
+        return !extractClaim(token, Claims::getExpiration).before(new Date());
     }
 }

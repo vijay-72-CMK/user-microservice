@@ -21,6 +21,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -88,7 +89,13 @@ public class UserServiceImpl implements UserService {
             String token = jwtService.generateToken(userDetails);
             HttpHeaders headers = new HttpHeaders();
             long expiry = 259200;
-            headers.add("Set-Cookie", "accessToken=" + token + ";Max-Age=" + expiry + ";Secure; HttpOnly");
+            ResponseCookie cookie = ResponseCookie.from("accessToken", token)
+                    .maxAge(expiry)
+                    .httpOnly(true)
+                    .secure(true) // or false depending on your security requirements
+                    .path("/api")
+                    .build();
+            headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
             return ResponseEntity.ok().headers(headers).body("Logged in successfully!");
         } catch (BadCredentialsException ex) {
             throw new GeneralInternalException("Bad credentials(sign in), please enter correct username and password", HttpStatus.BAD_REQUEST);
@@ -126,7 +133,7 @@ public class UserServiceImpl implements UserService {
         try {
             UserEntity userDetails = (UserEntity) ((UsernamePasswordAuthenticationToken) signedInUser).getPrincipal();
 
-            UserEntity currUser = userRepository.findByUsername(userDetails.getUsername())
+            UserEntity currUser = userRepository.findById(Long.valueOf(userDetails.getUsername()))
                     .orElseThrow(() -> new GeneralInternalException("User id not found while adding address", HttpStatus.NOT_FOUND));
 
             AddressEntity addressEntity = AddressEntity.builder()
