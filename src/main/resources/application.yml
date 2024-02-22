@@ -1,3 +1,5 @@
+jwt:
+  expiration-time: 604800 # JWT token expiration time in seconds (one week)
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/sql_db

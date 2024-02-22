@@ -17,6 +17,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -40,6 +41,9 @@ import java.util.List;
 @Slf4j
 @Transactional
 public class UserServiceImpl implements UserService {
+
+    @Value("${jwt.expiration-time}")
+    private long jwtExpirationTimeSeconds;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
@@ -88,9 +92,8 @@ public class UserServiceImpl implements UserService {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String token = jwtService.generateToken(userDetails);
             HttpHeaders headers = new HttpHeaders();
-            long expiry = 259200;
             ResponseCookie cookie = ResponseCookie.from("accessToken", token)
-                    .maxAge(expiry)
+                    .maxAge(jwtExpirationTimeSeconds)
                     .httpOnly(true)
                     .secure(true) // or false depending on your security requirements
                     .path("/api")

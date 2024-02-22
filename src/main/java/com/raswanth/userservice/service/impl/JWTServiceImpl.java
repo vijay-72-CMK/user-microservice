@@ -6,11 +6,14 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -18,10 +21,16 @@ import java.util.function.Function;
 
 @Service
 public class JWTServiceImpl implements JWTService {
+
+    @Value("${jwt.expiration-time}")
+    private long jwtExpirationTimeSeconds;
     private static final String secretKey = "bfc80827f07c171a3e1f0661a1abfd52ab1fec954283772e19c1a673efa58e41";
 
     @Override
     public String generateToken(UserDetails userDetails) {
+        Instant expirationInstant = Instant.now().plus(jwtExpirationTimeSeconds, ChronoUnit.SECONDS);
+        Date expirationTime = Date.from(expirationInstant);
+
         Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
         List<String> authorityNames = authorities.stream()
                 .map(GrantedAuthority::getAuthority)
@@ -29,7 +38,7 @@ public class JWTServiceImpl implements JWTService {
         return Jwts.builder().subject((userDetails.getUsername()))
                 .claim("authorities", authorityNames)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 3600000 * 3))
+                .expiration(expirationTime)
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
