@@ -135,9 +135,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void addAddress(AddressRequestDTO addressRequest, Principal signedInUser) {
         try {
-            UserEntity userDetails = (UserEntity) ((UsernamePasswordAuthenticationToken) signedInUser).getPrincipal();
-
-            UserEntity currUser = userRepository.findById(Long.valueOf(userDetails.getUsername()))
+            Long userId = Long.valueOf(signedInUser.getName());
+            UserEntity currUser = userRepository.findById(userId)
                     .orElseThrow(() -> new GeneralInternalException("User id not found while adding address", HttpStatus.NOT_FOUND));
 
             AddressEntity addressEntity = AddressEntity.builder()

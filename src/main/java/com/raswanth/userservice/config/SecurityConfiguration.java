@@ -37,16 +37,13 @@ public class SecurityConfiguration {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers("/api/users/changePassword").authenticated().
-                         requestMatchers("/api/users/login").permitAll()
-                        .requestMatchers("/api/users/register").permitAll()
-                        .requestMatchers("/api/users/all").hasAuthority("Admin")
-                        .requestMatchers("/api/users/{userId}").hasAuthority("Admin")
-                        .anyRequest().authenticated())
+                        request.requestMatchers("/api/users/{userId:[\\d+]}", "/api/users/all").hasAuthority("Admin")
+                                .requestMatchers("/api/users/login", "/api/users/register").permitAll()
+                                .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class
-        );
+                );
         return http.build();
     }
 
@@ -54,7 +51,7 @@ public class SecurityConfiguration {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder());
-        return  authenticationProvider;
+        return authenticationProvider;
     }
 
     @Bean
