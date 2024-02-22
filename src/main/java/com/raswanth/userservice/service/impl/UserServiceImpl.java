@@ -113,7 +113,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void changePassword(@Valid ChangePasswordRequestDto changePasswordRequestDto, Principal signedInUser) {
         try {
-            UserEntity user = (UserEntity) ((UsernamePasswordAuthenticationToken) signedInUser).getPrincipal();
+            Long userId = Long.valueOf(signedInUser.getName());
+            UserEntity user = userRepository.findById(userId).orElseThrow();
 
             // password checks
             if (!passwordEncoder.matches(changePasswordRequestDto.getCurrentPassword(), user.getPassword())) {
