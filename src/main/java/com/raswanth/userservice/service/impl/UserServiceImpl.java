@@ -105,9 +105,9 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public void deleteUser(String username) {
-        if (userRepository.deleteByUsername(username) == 0)
-            throw new GeneralInternalException("Could not delete user as username does not exist", HttpStatus.NOT_FOUND);
+    public void deleteUser(Long userId) {
+        if (userRepository.deleteById(userId) == 0)
+            throw new GeneralInternalException("Could not delete user as userId " + userId  + " does not exist", HttpStatus.NOT_FOUND);
     }
 
     @Override
@@ -119,6 +119,9 @@ public class UserServiceImpl implements UserService {
             // password checks
             if (!passwordEncoder.matches(changePasswordRequestDto.getCurrentPassword(), user.getPassword())) {
                 throw new GeneralInternalException("Current password is not correct, try again", HttpStatus.BAD_REQUEST);
+            }
+            if (passwordEncoder.matches(changePasswordRequestDto.getNewPassword(), user.getPassword())) {
+                throw new GeneralInternalException("New password cannot be same as old password", HttpStatus.BAD_REQUEST);
             }
             if (!changePasswordRequestDto.getNewPassword().equals(changePasswordRequestDto.getConfirmPassword())) {
                 throw new GeneralInternalException("Passwords do not match, try again", HttpStatus.BAD_REQUEST);

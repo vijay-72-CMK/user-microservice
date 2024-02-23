@@ -97,9 +97,9 @@ public class BaseExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMissingPathVariable(MissingPathVariableException ex, HttpHeaders headers,
                                                                HttpStatusCode status, WebRequest request) {
 
-        String error = ex.getParameter() + " parameter is missing";
+        String error = ex.getVariableName() + " parameter is missing";
         // Create the ProblemDetail object
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, "Missing path variable");
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, "Missing/Invalid path variable");
         problemDetail.setTitle("Your path parameters are missing");
         problemDetail.setType(URI.create("http://localhost:8080/errors/missingPathParameters"));
         problemDetail.setProperty("invalid-params", error);

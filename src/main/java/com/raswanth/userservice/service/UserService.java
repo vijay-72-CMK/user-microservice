@@ -17,7 +17,7 @@ public interface UserService {
 
     ResponseEntity<String> sigin(SignInRequestDTO signInRequestDTO);
 
-    void deleteUser(String username);
+    void deleteUser(Long id);
 
     void changePassword(ChangePasswordRequestDto changePasswordRequestDto, Principal singedInUser);
 

@@ -7,7 +7,7 @@ import com.raswanth.userservice.dto.UserRegistrationDTO;
 import com.raswanth.userservice.dto.ViewUsersResponseDTO;
 import com.raswanth.userservice.service.UserService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -48,9 +48,9 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @DeleteMapping("/{username}")
-    public ResponseEntity<String> deleteUser(@PathVariable @NotBlank(message = "Username cannot be blank") String username) {
-        userService.deleteUser(username);
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<String> deleteUser(@PathVariable @NotNull(message = "Id cannot be blank") @Positive(message = "Id must be positive") Long userId) {
+        userService.deleteUser(userId);
         return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully");
     }
 
