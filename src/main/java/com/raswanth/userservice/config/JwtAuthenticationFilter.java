@@ -13,11 +13,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.WebUtils;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -27,26 +27,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JWTService jwtService;
-    private final UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String jwt = null;
-        final String userId;
 
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals("accessToken")) {
-                    jwt = cookie.getValue();
-                }
-            }
+        Cookie accessTokenCookie = WebUtils.getCookie(request, "accessToken");
+        if (accessTokenCookie != null) {
+            jwt = accessTokenCookie.getValue();
         }
+
         if (jwt == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        userId = jwtService.extractUserName(jwt);
+        final String userId = jwtService.extractUserName(jwt);
 
         if (StringUtils.hasLength(userId) && SecurityContextHolder.getContext().getAuthentication() == null) {
 

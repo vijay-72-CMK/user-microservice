@@ -3,7 +3,6 @@ package com.raswanth.userservice.service.impl;
 import com.raswanth.userservice.service.JWTService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
@@ -39,7 +38,7 @@ public class JWTServiceImpl implements JWTService {
                 .claim("authorities", authorityNames)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(expirationTime)
-                .signWith(getSignKey(), SignatureAlgorithm.HS256)
+                .signWith(getSignKey())
                 .compact();
     }
 
@@ -53,17 +52,12 @@ public class JWTServiceImpl implements JWTService {
     }
 
     public Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(getSignKey()).build().parseClaimsJws(token).getBody();
+        return Jwts.parser().verifyWith(getSignKey()).build().parseSignedClaims(token).getPayload();
     }
 
-    private Key getSignKey() {
+    private SecretKey getSignKey() {
         byte[] key = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(key);
-    }
-
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUserName(token);
-        return username.equals(userDetails.getUsername()) && isTokenNotExpired(token);
     }
 
     public boolean isTokenNotExpired(String token) {
