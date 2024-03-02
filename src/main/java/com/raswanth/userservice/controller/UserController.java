@@ -72,4 +72,9 @@ public class UserController {
         return userService.getUserById(userId);
     }
 
+    @GetMapping("/myInfo")
+    public ViewUsersResponseDTO myInfo(Principal principal) {
+        return userService.getUserById(Long.valueOf(principal.getName()));
+    }
+
 }

@@ -95,8 +95,10 @@ public class UserServiceImpl implements UserService {
             ResponseCookie cookie = ResponseCookie.from("accessToken", token)
                     .maxAge(jwtExpirationTimeSeconds)
                     .httpOnly(true)
-                    .secure(true) // or false depending on your security requirements
+                    .sameSite("lax")
                     .path("/api")
+                    .domain("localhost")
+                    .secure(true)
                     .build();
             headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
             return ResponseEntity.ok().headers(headers).body("Logged in successfully!");
