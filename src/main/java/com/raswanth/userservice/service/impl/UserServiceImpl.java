@@ -171,6 +171,7 @@ public class UserServiceImpl implements UserService {
                     .addressEntities(user.getAddressEntities())
                     .mobileNumber(user.getMobileNumber())
                     .username(user.getUsername())
+                    .roles(user.getRoles())
                     .build();
         } catch (DataAccessException ex) {
             throw new GeneralInternalException("Database error while trying to add view user with id: " + id);
@@ -192,6 +193,7 @@ public class UserServiceImpl implements UserService {
                                 .addressEntities(user.getAddressEntities())
                                 .mobileNumber(user.getMobileNumber())
                                 .username(user.getUsername())
+                                .roles(user.getRoles())
                                 .build());
 
             }

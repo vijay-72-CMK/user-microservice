@@ -1,6 +1,7 @@
 package com.raswanth.userservice.dto;
 
 import com.raswanth.userservice.entity.AddressEntity;
+import com.raswanth.userservice.entity.RoleEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,4 +21,5 @@ public class ViewUsersResponseDTO {
 
     private Set<AddressEntity> addressEntities;
 
+    private Set<RoleEntity> roles;
 }
