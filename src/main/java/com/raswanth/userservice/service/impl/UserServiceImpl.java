@@ -2,6 +2,7 @@ package com.raswanth.userservice.service.impl;
 
 import com.raswanth.userservice.dto.AddressRequestDTO;
 import com.raswanth.userservice.dto.ChangePasswordRequestDto;
+import com.raswanth.userservice.dto.RoleDTO;
 import com.raswanth.userservice.dto.SignInRequestDTO;
 import com.raswanth.userservice.dto.UserRegistrationDTO;
 import com.raswanth.userservice.dto.ViewUsersResponseDTO;
@@ -32,9 +33,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.management.relation.Role;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -175,6 +179,26 @@ public class UserServiceImpl implements UserService {
                     .build();
         } catch (DataAccessException ex) {
             throw new GeneralInternalException("Database error while trying to add view user with id: " + id);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void changeUserRoles(Integer userId, List<RoleDTO> roleDTOs) {
+        try {
+            UserEntity user = userRepository.findById(userId)
+                    .orElseThrow(() -> new GeneralInternalException("User not found with id: " + userId, HttpStatus.NOT_FOUND));
+
+            List<RoleEntity> roles = roleDTOs.stream()
+                    .map(RoleDTO::getId)
+                    .map(roleId -> roleRepository.findById(roleId)
+                            .orElseThrow(() -> new GeneralInternalException("Invalid role ID: " + roleId)))
+                    .toList();
+
+            user.setRoles(new HashSet<>(roles));
+            userRepository.save(user);
+        } catch (DataAccessException e) {
+            throw new GeneralInternalException("Database error while trying to modify roles for user with id: " + userId);
         }
     }
 
